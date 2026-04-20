@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Calculadora de Precios — Kawaii Squishy & Konnichiwa</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#0f0f12;--surface:#18181e;--surface2:#22222a;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0eff5;--muted:#8a8996;--ap:#ff6eb4;--au:#9b7ff4;--ag:#5ef0a0;--aa:#ffc84a;--ab:#60b8ff;--fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--r:14px;--rs:8px;}
+[data-theme="light"]{--bg:#f5f4f8;--surface:#ffffff;--surface2:#eeecf5;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);--text:#1a1a2e;--muted:#6b6a7a;--au:#7c5fe6;--ap:#e8559a;--ag:#1a9e5e;--ab:#2e86c1;--aa:#c49a0a;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;padding:2rem 1rem 5rem;transition:background .3s,color .3s;}
+body::before{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(155,127,244,.10) 0%,transparent 70%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-200px;left:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(255,110,180,.08) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.wrap{max-width:860px;margin:0 auto;position:relative;z-index:1;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+.hl{display:flex;align-items:center;gap:14px;}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--ap),var(--au));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ht h1{font-family:var(--fd);font-size:1.4rem;font-weight:700;letter-spacing:-.02em;}
+.ht p{font-size:12px;color:var(--muted);}
+.theme-btn{background:var(--surface);border:1px solid var(--border2);border-radius:30px;padding:7px 14px;color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s;}
+.theme-btn:hover{color:var(--text);}
+.tab-row{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap;}
+.tab{padding:8px 18px;border-radius:30px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
+.tab:hover{color:var(--text);}
+.tab.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.panel{display:none;}.panel.active{display:block;}
+.cur-row{display:flex;gap:6px;margin-bottom:1.2rem;}
+.cur-btn{padding:6px 16px;border-radius:30px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:var(--fb);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
+.cur-btn.ar{background:rgba(155,127,244,.15);color:var(--au);border-color:var(--au);}
+.cur-btn.au{background:rgba(94,240,160,.12);color:var(--ag);border-color:var(--ag);}
+.ipill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:30px;font-size:12px;margin-bottom:1.2rem;}
+.ipill.r{background:rgba(155,127,244,.10);color:var(--au);border:1px solid rgba(155,127,244,.25);}
+.ipill.u{background:rgba(94,240,160,.08);color:var(--ag);border:1px solid rgba(94,240,160,.2);}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.2rem;}
+.igrp{display:flex;flex-direction:column;gap:5px;}
+.igrp.full{grid-column:span 2;}
+.igrp label{font-size:11px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;}
+.igrp input,.igrp select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;color:var(--text);font-family:var(--fb);font-size:14px;transition:border-color .2s;width:100%;}
+.igrp input:focus{outline:none;border-color:var(--au);}
+.igrp input::placeholder{color:var(--muted);}
+.ss{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.2rem;margin-bottom:1.2rem;}
+.st{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem;}
+.sr{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.sr:last-child{margin-bottom:0;}
+.sl{font-size:12px;color:var(--muted);width:90px;flex-shrink:0;}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--surface2);border-radius:2px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--au);cursor:pointer;border:2px solid var(--bg);}
+.sv{font-size:13px;font-weight:500;color:var(--text);min-width:44px;text-align:right;}
+.rg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;}
+.rc{border-radius:var(--r);padding:1rem 1.1rem;border:1px solid var(--border);}
+.rc.cost{background:rgba(255,255,255,.03);}
+.rc.mayor{background:rgba(96,184,255,.07);border-color:rgba(96,184,255,.2);}
+.rc.detalle{background:rgba(255,110,180,.07);border-color:rgba(255,110,180,.2);}
+[data-theme="light"] .rc.cost{background:rgba(0,0,0,.03);}
+.rl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.rc.mayor .rl{color:var(--ab);}
+.rc.detalle .rl{color:var(--ap);}
+.rv{font-family:var(--fd);font-size:1.3rem;font-weight:700;color:var(--text);}
+.rc.mayor .rv{color:var(--ab);}
+.rc.detalle .rv{color:var(--ap);}
+.rs2{font-size:11px;color:var(--muted);margin-top:4px;}
+.pb{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem;margin-bottom:1.2rem;}
+.pb-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.9rem;}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.pc{background:var(--surface2);border-radius:var(--rs);padding:.75rem .9rem;text-align:center;}
+.pc-label{font-size:10px;color:var(--muted);margin-bottom:4px;}
+.pc-val{font-family:var(--fd);font-size:1.05rem;font-weight:700;}
+.pc-val.g{color:var(--ag);}
+.pc-val.b{color:var(--ab);}
+.pc-val.p{color:var(--ap);}
+.btn-save{width:100%;padding:12px;border-radius:var(--rs);border:none;background:linear-gradient(135deg,var(--au),var(--ap));color:#fff;font-family:var(--fd);font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.02em;transition:opacity .2s;}
+.btn-save:hover{opacity:.88;}
+.sb{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.2rem;}
+.sbc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:.75rem 1rem;}
+.sbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.sbv{font-family:var(--fd);font-size:1.15rem;font-weight:700;}
+.sbv.g{color:var(--ag);}
+.ar-row{display:flex;justify-content:flex-end;gap:8px;margin-bottom:1rem;}
+.btn-xl{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:30px;border:1px solid rgba(94,240,160,.35);background:rgba(94,240,160,.07);color:var(--ag);font-family:var(--fb);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-xl:hover{background:rgba(94,240,160,.14);}
+.sw{margin-bottom:1rem;}
+.sw input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;color:var(--text);font-family:var(--fb);font-size:13px;}
+.sw input:focus{outline:none;border-color:var(--au);}
+.sw input::placeholder{color:var(--muted);}
+.fr{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.2rem;}
+.ft{padding:4px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s;}
+.ft.active{background:rgba(155,127,244,.15);color:var(--au);border-color:var(--au);}
+.pcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem;margin-bottom:.85rem;transition:border-color .2s;}
+.pcard:hover{border-color:var(--border2);}
+.pt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.pn{font-family:var(--fd);font-size:15px;font-weight:600;}
+.pd{font-size:11px;color:var(--muted);}
+.pp{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.pill{font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;border:1px solid transparent;}
+.pr{background:rgba(155,127,244,.12);color:var(--au);border-color:rgba(155,127,244,.25);}
+.pu{background:rgba(94,240,160,.10);color:var(--ag);border-color:rgba(94,240,160,.2);}
+.pc2{background:rgba(255,255,255,.05);color:var(--muted);border-color:var(--border);}
+[data-theme="light"] .pc2{background:rgba(0,0,0,.05);}
+.pnum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.nb{background:var(--surface2);border-radius:var(--rs);padding:6px 10px;}
+.nl{font-size:10px;color:var(--muted);margin-bottom:2px;}
+.nv{font-family:var(--fd);font-size:13px;font-weight:600;}
+.nv.cc{color:var(--muted);}
+.nv.mc{color:var(--ab);}
+.nv.dc{color:var(--ap);}
+.pa{display:flex;gap:6px;flex-wrap:wrap;}
+.btn-lo{padding:5px 14px;border-radius:20px;border:1px solid rgba(155,127,244,.4);background:transparent;color:var(--au);font-size:12px;cursor:pointer;transition:all .2s;}
+.btn-lo:hover{background:rgba(155,127,244,.12);}
+.btn-ed{padding:5px 14px;border-radius:20px;border:1px solid rgba(255,200,74,.4);background:transparent;color:var(--aa);font-size:12px;cursor:pointer;transition:all .2s;}
+.btn-ed:hover{background:rgba(255,200,74,.10);}
+.btn-dl{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s;}
+.btn-dl:hover{border-color:rgba(255,100,100,.4);color:#ff6b6b;background:rgba(255,100,100,.07);}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem;}
+.mo.open{display:flex;}
+.md{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:1.5rem;width:100%;max-width:480px;}
+.md h2{font-family:var(--fd);font-size:1.1rem;font-weight:700;margin-bottom:1.2rem;}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem;}
+.mac{display:flex;gap:8px;justify-content:flex-end;}
+.btn-ca{padding:8px 20px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;}
+.btn-co{padding:8px 20px;border-radius:var(--rs);border:none;background:var(--au);color:#fff;font-size:13px;font-weight:500;cursor:pointer;}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.4rem;}
+.dc2{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem;}
+.dc2.full{grid-column:span 2;}
+.dt{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem;}
+.ti{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);}
+.ti:last-child{border-bottom:none;}
+.tn{font-size:13px;color:var(--text);}
+.tv{font-size:13px;font-weight:500;color:var(--ag);}
+.tbw{flex:1;margin:0 12px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.tb{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--au),var(--ap));}
+.empty{text-align:center;padding:3rem 0;color:var(--muted);font-size:13px;line-height:1.8;}
+.ei{font-size:2rem;margin-bottom:.5rem;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 20px;border-radius:30px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap;}
+.toast.show{opacity:1;}
+@media(max-width:560px){
+  .rg,.pg,.dg{grid-template-columns:1fr;}
+  .dc2.full{grid-column:span 1;}
+  .ig,.mg{grid-template-columns:1fr;}
+  .igrp.full{grid-column:span 1;}
+  .sb{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="hl">
+    <div class="logo">✦</div>
+    <div class="ht">
+      <h1>Calculadora de Precios</h1>
+      <p>Kawaii Squishy &amp; Konnichiwa · Honduras</p>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙 Oscuro</button>
+</header>
+
+<div class="tab-row">
+  <button class="tab active" onclick="switchTab('calc',this)">Calculadora</button>
+  <button class="tab" onclick="switchTab('hist',this)">Historial</button>
+  <button class="tab" onclick="switchTab('dash',this)">Dashboard</button>
+</div>
+
+<!-- CALCULADORA -->
+<div class="panel active" id="panel-calc">
+  <div class="cur-row">
+    <button class="cur-btn ar" id="btn-rmb" onclick="switchCurrency('rmb')">¥ RMB</button>
+    <button class="cur-btn" id="btn-usd" onclick="switchCurrency('usd')">$ USD</button>
+  </div>
+
+  <div id="rmb-block">
+    <div class="ipill r">✦ Fórmula: RMB × 5.5 = Landed cost en HNL</div>
+    <div class="ig">
+      <div class="igrp full"><label>Nombre del producto</label><input type="text" id="rmb-nombre" placeholder="Ej: Tarjetas Naruto LOMO"/></div>
+      <div class="igrp"><label>Precio unitario (¥ RMB)</label><input type="number" id="rmb-precio" value="3.10" step="0.01" oninput="renderCurrent()"/></div>
+      <div class="igrp"><label>Categoría</label><input type="text" id="rmb-cat" placeholder="Ej: Tarjetas, Figuras..."/></div>
+    </div>
+  </div>
+
+  <div id="usd-block" style="display:none;">
+    <div class="ipill u">✦ Fórmula: USD × cambio × factor = Landed cost en HNL</div>
+    <div class="ig">
+      <div class="igrp full"><label>Nombre del producto</label><input type="text" id="usd-nombre" placeholder="Ej: Funko Pop"/></div>
+      <div class="igrp"><label>Precio unitario ($ USD)</label><input type="number" id="usd-precio" value="5.00" step="0.01" oninput="renderCurrent()"/></div>
+      <div class="igrp"><label>Tipo de cambio (L/$)</label><input type="number" id="usd-cambio" value="26.70" step="0.01" oninput="renderCurrent()"/></div>
+      <div class="igrp"><label>Factor landed USD</label><input type="number" id="usd-factor" value="1.38" step="0.01" oninput="renderCurrent()"/></div>
+      <div class="igrp"><label>Categoría</label><input type="text" id="usd-cat" placeholder="Ej: Figuras, Peluches..."/></div>
+    </div>
+  </div>
+
+  <div class="ig">
+    <div class="igrp"><label>Cantidad de unidades / cajas</label><input type="number" id="cantidad" value="1" min="1" step="1" oninput="renderCurrent()"/></div>
+    <div class="igrp"><label>% Que vendés al por mayor</label><input type="number" id="pct-mayor" value="50" min="0" max="100" step="5" oninput="renderCurrent()"/></div>
+  </div>
+
+  <div class="ss">
+    <div class="st">Márgenes de ganancia</div>
+    <div class="sr"><span class="sl">Mayoreo (%)</span><input type="range" id="sl-mayor" min="50" max="300" step="5" value="150" oninput="renderCurrent()"><span class="sv" id="val-mayor">150%</span></div>
+    <div class="sr"><span class="sl">Detalle (%)</span><input type="range" id="sl-detalle" min="100" max="500" step="10" value="200" oninput="renderCurrent()"><span class="sv" id="val-detalle">200%</span></div>
+  </div>
+
+  <div class="rg" id="result-cards"></div>
+
+  <div class="pb">
+    <div class="pb-title">Ganancia total del lote</div>
+    <div class="pg" id="profit-cards"></div>
+  </div>
+
+  <button class="btn-save" onclick="saveProduct()">Guardar en historial →</button>
+</div>
+
+<!-- HISTORIAL -->
+<div class="panel" id="panel-hist">
+  <div class="sb" id="summary-bar"></div>
+  <div class="ar-row">
+    <button class="btn-xl" onclick="exportToExcel()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      Descargar Excel
+    </button>
+  </div>
+  <div class="sw"><input type="text" id="hist-search" placeholder="Buscar producto..." oninput="renderHist()"/></div>
+  <div class="fr" id="filter-row"></div>
+  <div id="hist-list"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="panel" id="panel-dash">
+  <div id="dash-content"></div>
+</div>
+</div>
+
+<!-- Edit Modal -->
+<div class="mo" id="editModal">
+  <div class="md">
+    <h2>Editar producto</h2>
+    <div class="mg">
+      <div class="igrp full"><label>Nombre</label><input type="text" id="edit-nombre"/></div>
+      <div class="igrp"><label>Categoría</label><input type="text" id="edit-cat"/></div>
+      <div class="igrp"><label>Precio original</label><input type="text" id="edit-porig" readonly style="opacity:.5;cursor:not-allowed;"/></div>
+      <div class="igrp"><label>Margen mayoreo (%)</label><input type="number" id="edit-mayor" step="5"/></div>
+      <div class="igrp"><label>Margen detalle (%)</label><input type="number" id="edit-detalle" step="10"/></div>
+    </div>
+    <div class="mac">
+      <button class="btn-ca" onclick="closeEdit()">Cancelar</button>
+      <button class="btn-co" onclick="saveEdit()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let currency='rmb',products=[],activeFilter='all',editingId=null;
+const SK='kawaii_v3';
+let charts={};
+
+function r5(n){return Math.ceil(n/5)*5;}
+function fn(n){return n.toLocaleString('es',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmt(n){return 'L '+fn(n);}
+function today(){return new Date().toLocaleDateString('es-HN',{day:'2-digit',month:'short',year:'numeric'});}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+function toggleTheme(){
+  const h=document.documentElement;
+  const d=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',d?'light':'dark');
+  document.getElementById('themeBtn').textContent=d?'☀️ Claro':'🌙 Oscuro';
+  localStorage.setItem('ktheme',d?'light':'dark');
+  if(document.getElementById('panel-dash').classList.contains('active'))renderDash();
+}
+
+function switchTab(tab,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-row .tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  el.classList.add('active');
+  if(tab==='hist'){loadP();renderHist();}
+  if(tab==='dash'){loadP();renderDash();}
+}
+
+function switchCurrency(c){
+  currency=c;
+  document.getElementById('rmb-block').style.display=c==='rmb'?'block':'none';
+  document.getElementById('usd-block').style.display=c==='usd'?'block':'none';
+  document.getElementById('btn-rmb').className='cur-btn'+(c==='rmb'?' ar':'');
+  document.getElementById('btn-usd').className='cur-btn'+(c==='usd'?' au':'');
+  renderCurrent();
+}
+
+function getLanded(){
+  if(currency==='rmb') return (parseFloat(document.getElementById('rmb-precio').value)||0)*5.5;
+  const p=parseFloat(document.getElementById('usd-precio').value)||0;
+  const c=parseFloat(document.getElementById('usd-cambio').value)||26.7;
+  const f=parseFloat(document.getElementById('usd-factor').value)||1.38;
+  return p*c*f;
+}
+
+function renderCurrent(){
+  const pM=parseInt(document.getElementById('sl-mayor').value);
+  const pD=parseInt(document.getElementById('sl-detalle').value);
+  const qty=parseInt(document.getElementById('cantidad').value)||1;
+  const pctM=Math.min(100,Math.max(0,parseInt(document.getElementById('pct-mayor').value)||0));
+  document.getElementById('val-mayor').textContent=pM+'%';
+  document.getElementById('val-detalle').textContent=pD+'%';
+  const l=getLanded();
+  const mayor=r5(l*(1+pM/100));
+  const detalle=r5(l*(1+pD/100));
+  document.getElementById('result-cards').innerHTML=`
+    <div class="rc cost"><div class="rl">Landed cost / unidad</div><div class="rv">${fmt(l)}</div><div class="rs2">${currency==='rmb'?'RMB × 5.5':'USD × cambio × factor'}</div></div>
+    <div class="rc mayor"><div class="rl">Precio mayoreo</div><div class="rv">${fmt(mayor)}</div><div class="rs2">Ganancia ${fmt(mayor-l)} · +${pM}%</div></div>
+    <div class="rc detalle"><div class="rl">Precio detalle</div><div class="rv">${fmt(detalle)}</div><div class="rs2">Ganancia ${fmt(detalle-l)} · +${pD}%</div></div>
+  `;
+  const uM=Math.round(qty*(pctM/100));
+  const uD=qty-uM;
+  const inv=l*qty;
+  const ingM=uM*mayor, ingD=uD*detalle;
+  const ingT=ingM+ingD, ganT=ingT-inv;
+  const roi=inv>0?Math.round((ganT/inv)*100):0;
+  document.getElementById('profit-cards').innerHTML=`
+    <div class="pc"><div class="pc-label">Inversión total (${qty} uds)</div><div class="pc-val b">${fmt(inv)}</div></div>
+    <div class="pc"><div class="pc-label">Ingresos totales</div><div class="pc-val b">${fmt(ingT)}</div></div>
+    <div class="pc"><div class="pc-val g">${fmt(ganT)}</div><div class="pc-label">Ganancia neta</div></div>
+    <div class="pc"><div class="pc-label">${uM} uds al mayor</div><div class="pc-val b">${fmt(ingM)}</div></div>
+    <div class="pc"><div class="pc-label">${uD} uds al detalle</div><div class="pc-val p">${fmt(ingD)}</div></div>
+    <div class="pc"><div class="pc-val g">${roi}%</div><div class="pc-label">ROI del lote</div></div>
+  `;
+}
+
+function saveProduct(){
+  const nombre=currency==='rmb'?document.getElementById('rmb-nombre').value.trim():document.getElementById('usd-nombre').value.trim();
+  if(!nombre){toast('Ingresá el nombre del producto');return;}
+  const cat=(currency==='rmb'?document.getElementById('rmb-cat').value.trim():document.getElementById('usd-cat').value.trim())||'General';
+  const l=getLanded();
+  const pM=parseInt(document.getElementById('sl-mayor').value);
+  const pD=parseInt(document.getElementById('sl-detalle').value);
+  const qty=parseInt(document.getElementById('cantidad').value)||1;
+  let po=currency==='rmb'?'¥'+document.getElementById('rmb-precio').value:'$'+document.getElementById('usd-precio').value+'(L'+parseFloat(document.getElementById('usd-cambio').value).toFixed(2)+'/USD)';
+  loadP();
+  products.push({id:Date.now(),nombre,cat,moneda:currency==='rmb'?'RMB':'USD',precioOrig:po,cantidad:qty,landed:parseFloat(l.toFixed(2)),mayor:parseFloat(r5(l*(1+pM/100)).toFixed(2)),detalle:parseFloat(r5(l*(1+pD/100)).toFixed(2)),margenMayor:pM,margenDetalle:pD,fecha:today()});
+  saveP();
+  toast('✓ Producto guardado');
+}
+
+function loadP(){try{products=JSON.parse(localStorage.getItem(SK)||'[]');}catch(e){products=[];}}
+function saveP(){localStorage.setItem(SK,JSON.stringify(products));}
+
+function deleteProduct(id){loadP();products=products.filter(p=>p.id!==id);saveP();toast('Producto eliminado');renderHist();}
+
+function loadIntoCalc(p){
+  switchTab('calc',document.querySelector('.tab-row .tab'));
+  switchCurrency(p.moneda==='RMB'?'rmb':'usd');
+  if(p.moneda==='RMB'){document.getElementById('rmb-nombre').value=p.nombre;document.getElementById('rmb-cat').value=p.cat;document.getElementById('rmb-precio').value=(p.landed/5.5).toFixed(2);}
+  else{document.getElementById('usd-nombre').value=p.nombre;document.getElementById('usd-cat').value=p.cat;}
+  document.getElementById('sl-mayor').value=p.margenMayor;
+  document.getElementById('sl-detalle').value=p.margenDetalle;
+  document.getElementById('cantidad').value=p.cantidad||1;
+  renderCurrent();toast('Producto cargado');
+}
+
+function openEdit(id){
+  loadP();const p=products.find(x=>x.id===id);if(!p)return;
+  editingId=id;
+  document.getElementById('edit-nombre').value=p.nombre;
+  document.getElementById('edit-cat').value=p.cat;
+  document.getElementById('edit-porig').value=p.precioOrig;
+  document.getElementById('edit-mayor').value=p.margenMayor;
+  document.getElementById('edit-detalle').value=p.margenDetalle;
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEdit(){document.getElementById('editModal').classList.remove('open');editingId=null;}
+function saveEdit(){
+  loadP();const idx=products.findIndex(x=>x.id===editingId);if(idx===-1)return;
+  const p=products[idx];
+  const nM=parseInt(document.getElementById('edit-mayor').value)||p.margenMayor;
+  const nD=parseInt(document.getElementById('edit-detalle').value)||p.margenDetalle;
+  products[idx]={...p,nombre:document.getElementById('edit-nombre').value.trim()||p.nombre,cat:document.getElementById('edit-cat').value.trim()||p.cat,margenMayor:nM,margenDetalle:nD,mayor:parseFloat(r5(p.landed*(1+nM/100)).toFixed(2)),detalle:parseFloat(r5(p.landed*(1+nD/100)).toFixed(2))};
+  saveP();closeEdit();toast('✓ Producto actualizado');renderHist();
+}
+
+function setFilter(cat,el){activeFilter=cat;document.querySelectorAll('.ft').forEach(f=>f.classList.remove('active'));el.classList.add('active');renderHist();}
+
+function renderHist(){
+  loadP();
+  const q=document.getElementById('hist-search').value.toLowerCase();
+  const fil=products.filter(p=>(activeFilter==='all'||p.cat===activeFilter)&&(p.nombre.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)));
+  const totInv=products.reduce((s,p)=>s+p.landed*(p.cantidad||1),0);
+  document.getElementById('summary-bar').innerHTML=`
+    <div class="sbc"><div class="sbl">Productos</div><div class="sbv">${products.length}</div></div>
+    <div class="sbc"><div class="sbl">Categorías</div><div class="sbv">${[...new Set(products.map(p=>p.cat))].length}</div></div>
+    <div class="sbc"><div class="sbl">Mostrando</div><div class="sbv">${fil.length}</div></div>
+    <div class="sbc"><div class="sbl">Inversión total</div><div class="sbv g" style="font-size:.9rem;">${fmt(totInv)}</div></div>
+  `;
+  const cats=['all',...new Set(products.map(p=>p.cat))];
+  document.getElementById('filter-row').innerHTML=cats.map(c=>`<button class="ft ${activeFilter===c?'active':''}" onclick="setFilter('${c}',this)">${c==='all'?'Todos':c}</button>`).join('');
+  const list=document.getElementById('hist-list');
+  if(fil.length===0){list.innerHTML=`<div class="empty"><div class="ei">✦</div>No hay productos guardados aún.<br>Calculá un precio y guardalo.</div>`;return;}
+  list.innerHTML=[...fil].reverse().map(p=>`
+    <div class="pcard">
+      <div class="pt"><div class="pn">${p.nombre}</div><div class="pd">${p.fecha}</div></div>
+      <div class="pp">
+        <span class="pill ${p.moneda==='RMB'?'pr':'pu'}">${p.moneda} · ${p.precioOrig}</span>
+        <span class="pill pc2">${p.cat}</span>
+        ${p.cantidad&&p.cantidad>1?`<span class="pill pc2">${p.cantidad} uds</span>`:''}
+      </div>
+      <div class="pnum">
+        <div class="nb"><div class="nl">Landed</div><div class="nv cc">${fmt(p.landed)}</div></div>
+        <div class="nb"><div class="nl">Mayoreo +${p.margenMayor}%</div><div class="nv mc">${fmt(p.mayor)}</div></div>
+        <div class="nb"><div class="nl">Detalle +${p.margenDetalle}%</div><div class="nv dc">${fmt(p.detalle)}</div></div>
+      </div>
+      <div class="pa">
+        <button class="btn-lo" onclick='loadIntoCalc(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Cargar →</button>
+        <button class="btn-ed" onclick="openEdit(${p.id})">Editar</button>
+        <button class="btn-dl" onclick="deleteProduct(${p.id})">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDash(){
+  loadP();
+  const dc=document.getElementById('dash-content');
+  if(products.length===0){dc.innerHTML=`<div class="empty"><div class="ei">📊</div>Guardá productos primero para ver el dashboard.</div>`;return;}
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const tc=isDark?'#8a8996':'#6b6a7a';
+  const byCat={};
+  products.forEach(p=>{
+    if(!byCat[p.cat])byCat[p.cat]={inv:0,gan:0};
+    const q=p.cantidad||1;
+    byCat[p.cat].inv+=p.landed*q;
+    byCat[p.cat].gan+=(p.detalle-p.landed)*q;
+  });
+  const cats=Object.keys(byCat);
+  const colors=['#9b7ff4','#ff6eb4','#60b8ff','#5ef0a0','#ffc84a','#ff9f6b','#c084fc'];
+  const sorted=[...products].sort((a,b)=>b.margenDetalle-a.margenDetalle).slice(0,5);
+  const maxM=sorted[0]?.margenDetalle||1;
+  const totInv=products.reduce((s,p)=>s+p.landed*(p.cantidad||1),0);
+  const totGan=products.reduce((s,p)=>s+(p.detalle-p.landed)*(p.cantidad||1),0);
+  const avgM=products.length?Math.round(products.reduce((s,p)=>s+p.margenDetalle,0)/products.length):0;
+
+  dc.innerHTML=`
+    <div class="sb" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.4rem;">
+      <div class="sbc"><div class="sbl">Inversión total</div><div class="sbv" style="font-size:.9rem;">${fmt(totInv)}</div></div>
+      <div class="sbc"><div class="sbl">Ganancia potencial</div><div class="sbv g" style="font-size:.9rem;">${fmt(totGan)}</div></div>
+      <div class="sbc"><div class="sbl">Margen detalle prom.</div><div class="sbv" style="font-size:.9rem;">${avgM}%</div></div>
+    </div>
+    <div class="dg">
+      <div class="dc2"><div class="dt">Inversión por categoría</div><div style="position:relative;height:220px;"><canvas id="cInv" role="img" aria-label="Inversión por categoría"></canvas></div></div>
+      <div class="dc2"><div class="dt">Ganancia potencial por categoría</div><div style="position:relative;height:220px;"><canvas id="cGan" role="img" aria-label="Ganancia por categoría"></canvas></div></div>
+      <div class="dc2 full"><div class="dt">Top 5 productos por margen detalle</div>${sorted.map(p=>`<div class="ti"><span class="tn">${p.nombre}</span><div class="tbw"><div class="tb" style="width:${Math.round((p.margenDetalle/maxM)*100)}%"></div></div><span class="tv">+${p.margenDetalle}%</span></div>`).join('')}</div>
+    </div>
+  `;
+  ['cInv','cGan'].forEach(id=>{if(charts[id]){charts[id].destroy();delete charts[id];}});
+  const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:tc,font:{size:11},boxWidth:10,padding:10}},tooltip:{callbacks:{label:d=>' L '+fn(parseFloat(d.raw))}}}};
+  charts['cInv']=new Chart(document.getElementById('cInv'),{type:'doughnut',data:{labels:cats,datasets:[{data:cats.map(c=>byCat[c].inv.toFixed(2)),backgroundColor:colors,borderWidth:0}]},options:opts});
+  charts['cGan']=new Chart(document.getElementById('cGan'),{type:'doughnut',data:{labels:cats,datasets:[{data:cats.map(c=>byCat[c].gan.toFixed(2)),backgroundColor:colors,borderWidth:0}]},options:opts});
+}
+
+function exportToExcel(){
+  loadP();if(products.length===0){toast('No hay productos para exportar');return;}
+  const h=['Nombre','Categoría','Moneda','Precio Original','Cantidad','Landed (L)','Mayoreo (L)','Margen Mayor %','Detalle (L)','Margen Detalle %','Ganancia Detalle (L)','Fecha'];
+  const rows=products.map(p=>[p.nombre,p.cat,p.moneda,p.precioOrig,p.cantidad||1,p.landed.toFixed(2),p.mayor.toFixed(2),p.margenMayor+'%',p.detalle.toFixed(2),p.margenDetalle+'%',(p.detalle-p.landed).toFixed(2),p.fecha]);
+  const csv='\uFEFF'+[h,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=`kawaii-precios-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('✓ Descargando historial...');
+}
+
+// Init
+const th=localStorage.getItem('ktheme')||'dark';
+document.documentElement.setAttribute('data-theme',th);
+document.getElementById('themeBtn').textContent=th==='dark'?'🌙 Oscuro':'☀️ Claro';
+loadP();renderCurrent();renderHist();
+</script>
+</body>
+</html>
